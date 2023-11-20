@@ -82,7 +82,7 @@ class H5Writer:
         chunkshape = (1,) + ev_repr_shape
         self.maxshape = maxshape
         self.h5f.create_dataset(key, dtype=self.numpy_dtype.name, shape=chunkshape, chunks=chunkshape,
-                                maxshape=maxshape, **_blosc_opts(complevel=1, shuffle='byte'))
+                                maxshape=maxshape)
         self.t_idx = 0
 
     def __enter__(self):
@@ -728,12 +728,13 @@ if __name__ == '__main__':
     target_dir = Path(args.target_dir)
     os.makedirs(target_dir, exist_ok=True)
 
-    assert train_path.exists(), f'{train_path=}'
+    #assert train_path.exists(), f'{train_path=}'
     assert val_path.exists(), f'{val_path=}'
-    assert test_path.exists(), f'{test_path=}'
+    #assert test_path.exists(), f'{test_path=}'
 
     seq_data_list = list()
-    for split in [train_path, val_path, test_path]:
+    #for split in [train_path, val_path, test_path]:
+    for split in [val_path]:
         split_out_dir = target_dir / split.name
         os.makedirs(split_out_dir, exist_ok=True)
         for npy_file in split.iterdir():

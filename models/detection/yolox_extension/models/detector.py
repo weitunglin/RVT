@@ -10,7 +10,8 @@ except ImportError:
 
 from ...recurrent_backbone import build_recurrent_backbone
 from .build import build_yolox_fpn, build_yolox_head
-from utils.timers import TimerDummy as CudaTimer
+# from utils.timers import TimerDummy as CudaTimer
+from utils.timers import CudaTimer
 
 from data.utils.types import BackboneFeatures, LstmStates
 

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 import h5py
+import hdf5plugin
 import numpy as np
 import torch
 from torchdata.datapipes.map import MapDataPipe
@@ -9,7 +10,8 @@ from torchdata.datapipes.map import MapDataPipe
 from data.genx_utils.labels import ObjectLabelFactory, ObjectLabels
 from data.utils.spatial import get_original_hw
 from data.utils.types import DatasetType
-from utils.timers import TimerDummy as Timer
+# from utils.timers import TimerDummy as Timer
+from utils.timers import Timer
 
 
 def get_event_representation_dir(path: Path, ev_representation_name: str) -> Path:

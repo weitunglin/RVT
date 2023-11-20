@@ -28,7 +28,10 @@ def build_streaming_dataset(dataset_mode: DatasetMode, dataset_config: DictConfi
     num_splits = 0
     num_split_sequences = 0
     guarantee_labels = dataset_mode == DatasetMode.TRAIN
-    for entry in tqdm(split_path.iterdir(), desc=f'creating streaming {mode2str[dataset_mode]} datasets'):
+    dirs = list(split_path.iterdir())
+    if 'select_sequence' in dataset_config and isinstance(dataset_config.select_sequence, int):
+        dirs = [dirs[dataset_config.select_sequence]]
+    for entry in tqdm(dirs, desc=f'creating streaming {mode2str[dataset_mode]} datasets'):
         new_datapipes = get_sequences(path=entry, dataset_config=dataset_config, guarantee_labels=guarantee_labels)
         if len(new_datapipes) == 1:
             num_full_sequences += 1

@@ -1,3 +1,10 @@
+# notes
+
+* use nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 docker image
+* in /lib/x86_64-linux-gnu/ modify the softlink to libcuda.so.1 -> libcuda.so.510.108.03
+* download packages using ./install.sh (not using conda/mamba)
+* evaluate using ./run_eval.sh
+
 # RVT: Recurrent Vision Transformers for Object Detection with Event Cameras
 <p align="center">
   <img src="https://rpg.ifi.uzh.ch/img/papers/arxiv22_detection_mgehrig/combo.png" width="750">

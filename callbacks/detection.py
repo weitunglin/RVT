@@ -1,6 +1,8 @@
+import math
 from enum import Enum, auto
 from typing import Any
 
+import cv2
 import torch
 from einops import rearrange
 from omegaconf import DictConfig
@@ -28,6 +30,8 @@ class DetectionVizCallback(VizCallbackBase):
             self.label_map = LABELMAP_GEN4_SHORT
         else:
             raise NotImplementedError
+
+        self.batch_count = 0
 
     def on_train_batch_end_custom(self,
                                   logger: WandbLogger,
@@ -67,7 +71,7 @@ class DetectionVizCallback(VizCallbackBase):
                           caption=captions,
                           step=global_step)
 
-    def on_validation_batch_end_custom(self, batch: Any, outputs: Any):
+    def on_validation_batch_end_custom(self, batch: Any, logger: Any, outputs: Any):
         if outputs[ObjDetOutput.SKIP_VIZ]:
             return
         ev_tensor = outputs[ObjDetOutput.EV_REPR]
@@ -79,13 +83,19 @@ class DetectionVizCallback(VizCallbackBase):
         prediction_img = ev_img.copy()
         draw_bboxes(prediction_img, predictions_proph, labelmap=self.label_map)
         self.add_to_buffer(DetectionVizEnum.PRED_IMG_PROPH, prediction_img)
+        if 'select_sequence' in outputs and outputs['select_sequence']:
+            cv2.imwrite(f'/workspace/RVT/output_images/sample_prediction_{outputs["select_sequence"]}/{math.floor(self.batch_count/1):03}.jpg', prediction_img)
 
         labels_proph = outputs[ObjDetOutput.LABELS_PROPH]
         label_img = ev_img.copy()
         draw_bboxes(label_img, labels_proph, labelmap=self.label_map)
         self.add_to_buffer(DetectionVizEnum.LABEL_IMG_PROPH, label_img)
+        if 'select_sequence' in outputs and outputs['select_sequence']:
+            cv2.imwrite(f'/workspace/RVT/output_images/sample_label_{outputs["select_sequence"]}/{math.floor(self.batch_count/1):03}.jpg', label_img)
 
-    def on_validation_epoch_end_custom(self, logger: WandbLogger):
+        self.batch_count = self.batch_count + 1
+
+    def on_validation_epoch_end_custom(self, logger: WandbLogger, pl_module: Any):
         pred_imgs = self.get_from_buffer(DetectionVizEnum.PRED_IMG_PROPH)
         label_imgs = self.get_from_buffer(DetectionVizEnum.LABEL_IMG_PROPH)
         assert len(pred_imgs) == len(label_imgs)
@@ -94,7 +104,9 @@ class DetectionVizCallback(VizCallbackBase):
         for idx, (pred_img, label_img) in enumerate(zip(pred_imgs, label_imgs)):
             merged_img.append(rearrange([pred_img, label_img], 'pl H W C -> (pl H) W C', pl=2, C=3))
             captions.append(f'sample_{idx}')
+            if pl_module and isinstance(pl_module.full_config.custom.select_sequence, int):
+                cv2.imwrite(f'/workspace/RVT/output_images/sample_{pl_module.full_config.custom.select_sequence}/{math.floor(idx/1):03}.jpg', merged_img[-1])
 
-        logger.log_images(key='val/predictions',
-                          images=merged_img,
-                          caption=captions)
+        # logger.log_images(key='val/predictions',
+        #                   images=merged_img,
+        #                   caption=captions)

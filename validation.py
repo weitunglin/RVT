@@ -21,6 +21,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import ModelSummary
 
+from callbacks.custom import get_viz_callback
+from loggers.utils import get_wandb_logger
 from config.modifier import dynamically_modify_train_config
 from modules.utils.fetch import fetch_data_module, fetch_model_module
 
@@ -33,6 +35,8 @@ def main(config: DictConfig):
 
     print('------ Configuration ------')
     print(OmegaConf.to_yaml(config))
+    if isinstance(config.custom.select_sequence, int):
+        config.dataset.select_sequence = config.custom.select_sequence
     print('---------------------------')
 
     # ---------------------
@@ -63,7 +67,10 @@ def main(config: DictConfig):
     # ---------------------
     # Callbacks and Misc
     # ---------------------
-    callbacks = [ModelSummary(max_depth=2)]
+    callbacks = list()
+    viz_callback = get_viz_callback(config=config)
+    callbacks.append(viz_callback)
+    callbacks.append(ModelSummary(max_depth=2))
 
     # ---------------------
     # Validation

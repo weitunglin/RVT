@@ -276,6 +276,9 @@ class Module(pl.LightningModule):
         if self.started_training:
             self.mode_2_psee_evaluator[mode].add_labels(loaded_labels_proph)
             self.mode_2_psee_evaluator[mode].add_predictions(yolox_preds_proph)
+        
+        if isinstance(self.full_config.custom.select_sequence, int):
+           output['select_sequence'] = self.full_config.custom.select_sequence
 
         return output
 

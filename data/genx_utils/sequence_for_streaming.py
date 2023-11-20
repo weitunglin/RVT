@@ -11,7 +11,8 @@ from data.genx_utils.labels import SparselyBatchedObjectLabels
 from data.genx_utils.sequence_base import SequenceBase, get_objframe_idx_2_repr_idx
 from data.utils.augmentor import RandomSpatialAugmentorGenX
 from data.utils.types import DataType, DatasetType, LoaderDataDictGenX
-from utils.timers import TimerDummy as Timer
+# from utils.timers import TimerDummy as Timer
+from utils.timers import Timer
 
 
 def _scalar_as_1d_array(scalar: Union[int, float]):

@@ -115,20 +115,20 @@ class VizCallbackBase(Callback):
             return
         if dataloader_idx > 0:
             raise NotImplementedError
-        if not self._training_has_started:
-            # PL has a short sanity check for validation. Hence, we have to make sure that one training run is done.
-            return
+        # if not self._training_has_started:
+        #     # PL has a short sanity check for validation. Hence, we have to make sure that one training run is done.
+        #     return
         if not self._selected_val_batches:
             # We only want to add validation batch indices during the first true validation run.
             self._val_batch_indices.append(batch_idx)
-            return
+
         assert len(self._val_batch_indices) > 0
         if batch_idx not in self._val_batch_indices:
             return
         if trainer.current_epoch % log_freq_val_epochs != 0:
             return
 
-        self.on_validation_batch_end_custom(batch, outputs)
+        self.on_validation_batch_end_custom(batch, trainer.logger, outputs)
 
     def on_validation_epoch_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
         self._reset_buffer()
@@ -147,13 +147,13 @@ class VizCallbackBase(Callback):
             sampled_indices = random.sample(self._val_batch_indices, num_samples)
             self._val_batch_indices = sampled_indices
             self._selected_val_batches = True
-            return
-        if trainer.current_epoch % log_freq_val_epochs != 0:
-            return
+        #     return
+        # if trainer.current_epoch % log_freq_val_epochs != 0:
+        #     return
 
         logger: Optional[WandbLogger] = trainer.logger
-        assert isinstance(logger, WandbLogger)
-        self.on_validation_epoch_end_custom(logger)
+        # assert isinstance(logger, WandbLogger)
+        self.on_validation_epoch_end_custom(logger, pl_module)
 
     def on_train_batch_start(
             self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", batch: Any, batch_idx: int
