@@ -1,9 +1,51 @@
-# notes
+# Quick Start (docker)
 
-* use nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 docker image
-* in /lib/x86_64-linux-gnu/ modify the softlink to libcuda.so.1 -> libcuda.so.510.108.03
-* download packages using ./install.sh (not using conda/mamba)
-* evaluate using ./run_eval.sh
+## Prerequisite
+
+* install docker
+* install docker compose
+
+## Environment Setup
+
+* docker-compose.yml
+```yaml
+version: '3.9'
+services:
+  rvt:
+    image: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+    container_name: rvt
+    ports:
+       - 5007:8888
+       - 5008:6006
+       - 5009:8080
+    shm_size: 250g
+   deploy:
+     resources:
+       reservations:
+         devices:
+           - driver: nvidia
+             count: 8
+             capabilities: [gpu]
+   volumes:
+     - PATH_TO_WORKSPACE:/workspace
+     - PATH_TO_DATASET:/vol/NAS-Datasets
+   stdin_open: true
+   tty: true
+```
+* `docker compose up -d`
+
+```bash
+docker exec -it rvt bash
+# inside docker
+cd /workspace
+git clone https://github.com/weitunglin/RVT.git
+cd RVT
+./install.sh
+
+apt-get install -y wget
+mkdir ckpts && cd ckpts && wget 'https://download.ifi.uzh.ch/rpg/RVT/checkpoints/gen1/rvt-s.ckpt' && cd ..
+./run_eval.sh # change your configs/paths in run_eval.sh
+```
 
 # RVT: Recurrent Vision Transformers for Object Detection with Event Cameras
 <p align="center">
